@@ -28,7 +28,7 @@ import type { Vehicle } from '../types/vehicle';
 export default function VehicleDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { profile } = useProfileStore();
+  const { vehicleProfile, completed } = useProfileStore();
   const { getAccessTokenSilently } = useAuth0();
 
   const [vehicle, setVehicle] = useState<Vehicle | null>(null);
@@ -271,7 +271,9 @@ export default function VehicleDetail() {
             {/* Right Column - Sidebar */}
             <div className="space-y-6">
               {/* Reason Panel */}
-              {profile.completed && <ReasonPanel vehicle={vehicle} profile={profile} />}
+              {completed && vehicleProfile && (
+                <ReasonPanel vehicle={vehicle} profile={vehicleProfile} />
+              )}
 
               {/* Payment Breakdown */}
               <PaymentBreakdown vehicle={vehicle} />

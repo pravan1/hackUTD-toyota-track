@@ -32,11 +32,11 @@ export default function Chatbot() {
   const [isLoading, setIsLoading] = useState(false);
   const [vehicleData, setVehicleData] = useState<Vehicle[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const { profile } = useProfileStore();
+  const { vehicleProfile, completed } = useProfileStore();
 
   const mode: AIMode = localStorage.getItem('GEMINI_API_KEY') ? 'gemini' : 'mock';
   const quickSuggestions = getQuickSuggestions(
-    profile.completed ? profile : undefined
+    completed ? vehicleProfile : undefined
   );
 
   useEffect(() => {
@@ -83,7 +83,10 @@ export default function Chatbot() {
       const response = await generateAIResponse(
         textToSend,
         mode,
-        { profile: profile.completed ? profile : undefined, vehicles: vehicleData },
+        {
+          profile: completed ? vehicleProfile : undefined,
+          vehicles: vehicleData
+        },
         apiKey,
         model
       );

@@ -89,3 +89,64 @@ Respond with:
   return extractText(result);
 };
 
+const cleanJsonText = (raw = '') => {
+  const trimmed = raw.trim();
+  if (trimmed.startsWith('```')) {
+    return trimmed.replace(/^```json\s*/i, '').replace(/```$/i, '').trim();
+  }
+  return trimmed;
+};
+
+export const extractVehicleProfileInsights = async ({
+  lifeChapter,
+  stressNonNegotiables
+}) => {
+  const model = getModel();
+
+  const responses = [
+    {
+      prompt: 'Life chapter',
+      answer: lifeChapter || ''
+    },
+    {
+      prompt: 'Stress & non-negotiables',
+      answer: stressNonNegotiables || ''
+    }
+  ]
+    .filter((item) => item.answer && item.answer.trim().length > 0)
+    .map(
+      (item) =>
+        `${item.prompt}:\n${item.answer.trim().replace(/\s+/g, ' ').trim()}`
+    )
+    .join('\n\n');
+
+  if (!responses) {
+    return null;
+  }
+
+  const prompt = `
+Extract a structured JSON profile from this user's text. Focus only on these fields:
+
+life_stage: one of ["student", "young_professional", "new_parent", "growing_family", "retiree", "adventurer"].
+top_goals: short list of natural language goals.
+vehicle_needs: list of tags like ["family_space", "off_road", "easy_parking", "long_range", "luxury_feel", "future_tech"].
+financial_sentiment: one of ["very_cost_sensitive", "balanced", "flexible_spender"].
+key_concerns: list of strings like ["fuel_costs", "range_anxiety", "safety", "maintenance", "parking", "reliability", "charging"].
+
+Return ONLY valid JSON.
+
+User responses:
+${responses}
+`;
+
+  const result = await model.generateContent(prompt);
+  const text = extractText(result);
+  const cleaned = cleanJsonText(text);
+  try {
+    return JSON.parse(cleaned);
+  } catch (error) {
+    console.warn('Failed to parse Gemini JSON payload', { cleaned });
+    return null;
+  }
+};
+

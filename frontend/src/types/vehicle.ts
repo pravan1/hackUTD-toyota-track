@@ -2,6 +2,7 @@ export type VehicleFuelType = 'Gasoline' | 'Hybrid' | 'EV';
 export type VehicleBodyStyle =
   | 'Sedan'
   | 'SUV'
+  | 'Crossover'
   | 'Truck'
   | 'Hatchback'
   | 'Coupe'

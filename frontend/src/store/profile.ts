@@ -1,125 +1,158 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type {
-  VehicleFuelType,
-  VehicleBodyStyle
-} from '../types/vehicle';
+import type { Vehicle } from '../types/vehicle';
 
-export type DecisionStyle = 'lease' | 'finance' | 'undecided';
-export type LifestyleTag = 'commuter' | 'family' | 'adventure' | 'eco' | 'tech';
-export type CommuteIntensity = 'low' | 'medium' | 'high';
-export type FuelPreference = VehicleFuelType | 'any';
-export type BodyStylePreference = VehicleBodyStyle | 'any';
+export type PrimaryUse = 'commuter' | 'family' | 'outdoor' | 'eco_urban';
+export type VehicleStyle =
+  | 'sedan_lux'
+  | 'crossover_suv'
+  | 'truck_offroad'
+  | 'ev_tech';
 
-export interface UserProfile {
-  budgetMonthly: number;
-  preferredFuelType: FuelPreference;
-  preferredBodyStyle: BodyStylePreference;
-  commuteIntensity: CommuteIntensity;
-  lifestyleTags: LifestyleTag[];
-  decisionStyle: DecisionStyle;
-  completed: boolean;
-  completedAt?: Date;
+export interface UserVehicleProfile {
+  primaryUse: PrimaryUse;
+  prefFuel: string[];
+  ecoPriority: number;
+  parkingTight: boolean;
+  needsCompact: boolean;
+  needs4WD: boolean;
+  needsHighwayComfort?: boolean;
+  offRoadPriority: number;
+  longRange: boolean;
+  seatNeed: number;
+  cargoNeed: number;
+  style: VehicleStyle;
+  budgetSensitivity: number;
+  lifeStage?: string;
+  vehicleNeedsTags?: string[];
+  financialSentiment?: string;
+  keyConcerns?: string[];
 }
 
-export interface PreferenceDTO {
-  budgetMin?: number;
-  budgetMax?: number;
-  fuelTypes?: VehicleFuelType[];
-  bodyStyles?: VehicleBodyStyle[];
-  seatCountMin?: number;
-  primaryUseCases?: string[];
+export interface GeminiProfileInsights {
+  lifeStage: string | null;
+  topGoals: string[];
+  vehicleNeeds: string[];
+  financialSentiment: string | null;
+  keyConcerns: string[];
+}
+
+export type McqOption = 'A' | 'B' | 'C' | 'D';
+export type McqQuestion = 'q1' | 'q2' | 'q3' | 'q4' | 'q5' | 'q6';
+
+export type McqAnswers = Record<McqQuestion, McqOption | null>;
+
+export interface FrqResponses {
+  lifeChapter: string;
+  stressNonNegotiables: string;
+}
+
+export interface QuizAnswers {
+  mcq: McqAnswers;
+  frq: FrqResponses;
+}
+
+export interface VehicleRecommendation {
+  vehicle: Vehicle;
+  score: number;
+  reasons: string[];
+  summary: string;
+  rank: number;
+  badge: 'best_match' | 'great_alternative';
+}
+
+export interface QuizResultPayload {
+  profile: UserVehicleProfile;
+  geminiProfile: GeminiProfileInsights | null;
+  frqResponses: FrqResponses;
+  recommendations: VehicleRecommendation[];
 }
 
 interface ProfileStore {
-  profile: UserProfile;
-  updateProfile: (updates: Partial<UserProfile>) => void;
-  resetProfile: () => void;
-  completeProfile: () => void;
-  toPreferencePayload: () => PreferenceDTO;
+  answers: QuizAnswers;
+  vehicleProfile?: UserVehicleProfile;
+  geminiProfile?: GeminiProfileInsights | null;
+  frqResponses?: FrqResponses;
+  recommendations: VehicleRecommendation[];
+  completed: boolean;
+  completedAt?: string;
+  setMcqAnswer: (question: McqQuestion, answer: McqOption) => void;
+  setFrqResponse: (field: keyof FrqResponses, value: string) => void;
+  setQuizResult: (payload: QuizResultPayload) => void;
+  resetQuiz: () => void;
 }
 
-const defaultProfile: UserProfile = {
-  budgetMonthly: 400,
-  preferredFuelType: 'any',
-  preferredBodyStyle: 'any',
-  commuteIntensity: 'medium',
-  lifestyleTags: [],
-  decisionStyle: 'undecided',
-  completed: false
-};
+const createDefaultAnswers = (): QuizAnswers => ({
+  mcq: {
+    q1: null,
+    q2: null,
+    q3: null,
+    q4: null,
+    q5: null,
+    q6: null
+  },
+  frq: {
+    lifeChapter: '',
+    stressNonNegotiables: ''
+  }
+});
 
 export const useProfileStore = create<ProfileStore>()(
   persist(
-    (set, get) => ({
-      profile: defaultProfile,
+    (set) => ({
+      answers: createDefaultAnswers(),
+      vehicleProfile: undefined,
+      geminiProfile: undefined,
+      frqResponses: undefined,
+      recommendations: [],
+      completed: false,
 
-      updateProfile: (updates) =>
+      setMcqAnswer: (question, answer) =>
         set((state) => ({
-          profile: { ...state.profile, ...updates }
-        })),
-
-      resetProfile: () =>
-        set({
-          profile: defaultProfile
-        }),
-
-      completeProfile: () =>
-        set((state) => ({
-          profile: {
-            ...state.profile,
-            completed: true,
-            completedAt: new Date()
+          answers: {
+            ...state.answers,
+            mcq: {
+              ...state.answers.mcq,
+              [question]: answer
+            }
           }
         })),
 
-      toPreferencePayload: () => {
-        const profile = get().profile;
-        const budgetMonthly = profile.budgetMonthly;
-        const budgetMax = budgetMonthly ? budgetMonthly * 60 : undefined;
-        const budgetMin = budgetMax ? Math.max(budgetMax - 15000, 0) : undefined;
+      setFrqResponse: (field, value) =>
+        set((state) => ({
+          answers: {
+            ...state.answers,
+            frq: {
+              ...state.answers.frq,
+              [field]: value
+            }
+          }
+        })),
 
-        const fuelTypes =
-          profile.preferredFuelType === 'any'
-            ? undefined
-            : [profile.preferredFuelType];
-        const bodyStyles =
-          profile.preferredBodyStyle === 'any'
-            ? undefined
-            : [profile.preferredBodyStyle];
+      setQuizResult: (payload) =>
+        set(() => ({
+          vehicleProfile: payload.profile,
+          geminiProfile: payload.geminiProfile,
+          frqResponses: payload.frqResponses,
+          recommendations: payload.recommendations,
+          completed: true,
+          completedAt: new Date().toISOString()
+        })),
 
-        const primaryUseCases =
-          profile.lifestyleTags.length > 0
-            ? profile.lifestyleTags.map((tag) => {
-                switch (tag) {
-                  case 'commuter':
-                    return 'commuting';
-                  case 'family':
-                    return 'family';
-                  case 'adventure':
-                    return 'off-road';
-                  case 'eco':
-                    return 'eco';
-                  case 'tech':
-                    return 'technology';
-                  default:
-                    return tag;
-                }
-              })
-            : undefined;
-
-        return {
-          budgetMin,
-          budgetMax,
-          fuelTypes: fuelTypes as VehicleFuelType[] | undefined,
-          bodyStyles: bodyStyles as VehicleBodyStyle[] | undefined,
-          seatCountMin: profile.lifestyleTags.includes('family') ? 5 : undefined,
-          primaryUseCases
-        };
-      }
+      resetQuiz: () =>
+        set(() => ({
+          answers: createDefaultAnswers(),
+          vehicleProfile: undefined,
+          geminiProfile: undefined,
+          frqResponses: undefined,
+          recommendations: [],
+          completed: false,
+          completedAt: undefined
+        }))
     }),
     {
-      name: 'toyota-nexus-profile'
+      name: 'toyota-nexus-vehicle-profile'
     }
   )
 );
+

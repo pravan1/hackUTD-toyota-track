@@ -1,4 +1,10 @@
 import type { Vehicle, VehicleListResponse } from '../types/vehicle';
+import type {
+  FrqResponses,
+  GeminiProfileInsights,
+  UserVehicleProfile,
+  VehicleRecommendation
+} from '../store/profile';
 
 const getEnv = (key: string) =>
   import.meta.env[key as keyof ImportMetaEnv] ??
@@ -105,6 +111,39 @@ export const saveMyPreferences = (token: string, payload: PreferencePayload) => 
 export const deleteMyPreferences = (token: string) => {
   return request<void>('/preferences', {
     method: 'DELETE',
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+};
+
+export type QuizSubmissionPayload = {
+  mcqResponses: Record<'q1' | 'q2' | 'q3' | 'q4' | 'q5' | 'q6', string>;
+  frqResponses: FrqResponses;
+};
+
+export interface QuizSubmissionResponse {
+  profile: UserVehicleProfile;
+  geminiProfile: GeminiProfileInsights | null;
+  frqResponses: FrqResponses;
+  recommendations: VehicleRecommendation[];
+}
+
+export const submitVehicleProfile = (
+  token: string,
+  payload: QuizSubmissionPayload
+) => {
+  return request<QuizSubmissionResponse>('/preferences/vehicle-profile', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+};
+
+export const fetchVehicleProfile = (token: string) => {
+  return request<QuizSubmissionResponse>('/preferences/vehicle-profile', {
     headers: {
       Authorization: `Bearer ${token}`
     }

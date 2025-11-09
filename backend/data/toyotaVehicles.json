@@ -47,6 +47,28 @@
     "make": "Toyota",
     "model": "Camry",
     "year": 2025,
+    "trim": "XLE",
+    "price": 33920,
+    "fuelType": "Gasoline",
+    "bodyStyle": "Sedan",
+    "transmission": "8-speed automatic",
+    "drivetrain": "FWD",
+    "mpgCity": 28,
+    "mpgHighway": 39,
+    "seats": 5,
+    "imageUrl": "https://toyota.scene7.com/is/image/toyota/camrymy25_xle_windchillpearl?wid=1200",
+    "features": [
+      "Toyota Safety Sense 3.0",
+      "12.3-inch infotainment display",
+      "Heated and ventilated front seats",
+      "Power moonroof",
+      "Wireless Apple CarPlay & Android Auto"
+    ]
+  },
+  {
+    "make": "Toyota",
+    "model": "Camry",
+    "year": 2025,
     "trim": "SE Hybrid",
     "price": 32450,
     "fuelType": "Hybrid",
@@ -129,6 +151,28 @@
       "JBL premium audio",
       "Digital gauge cluster",
       "Blind Spot Monitor"
+    ]
+  },
+  {
+    "make": "Toyota",
+    "model": "Corolla Cross",
+    "year": 2024,
+    "trim": "XLE AWD",
+    "price": 31500,
+    "fuelType": "Gasoline",
+    "bodyStyle": "Crossover",
+    "transmission": "CVT",
+    "drivetrain": "AWD",
+    "mpgCity": 29,
+    "mpgHighway": 32,
+    "seats": 5,
+    "imageUrl": "https://toyota.scene7.com/is/image/toyota/corollacrossmy24_xle_jetblack?wid=1200",
+    "features": [
+      "Heated SofTex-trimmed seats",
+      "Power liftgate with height adjustment",
+      "Qi wireless charging",
+      "Toyota Safety Sense 3.0",
+      "10.5-inch Toyota Audio Multimedia Display"
     ]
   },
   {
@@ -327,6 +371,28 @@
       "Hands-free power liftgate",
       "Heated and ventilated front seats",
       "Advanced Park assist"
+    ]
+  },
+  {
+    "make": "Toyota",
+    "model": "bZ4X",
+    "year": 2024,
+    "trim": "Limited AWD",
+    "price": 47185,
+    "fuelType": "EV",
+    "bodyStyle": "SUV",
+    "transmission": "Single-speed",
+    "drivetrain": "AWD",
+    "mpgCity": 0,
+    "mpgHighway": 0,
+    "seats": 5,
+    "imageUrl": "https://toyota.scene7.com/is/image/toyota/bz4xmy24_limited_elemental?wid=1200",
+    "features": [
+      "Estimated 252-mile range",
+      "Advanced Park assist",
+      "Panoramic roof with fixed glass panel",
+      "Heated and ventilated front seats",
+      "12.3-inch Toyota Audio Multimedia with JBL audio"
     ]
   },
   {

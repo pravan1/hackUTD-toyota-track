@@ -1,7 +1,7 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { estimateFinance, formatCurrency, formatMonthly } from './finance';
 import type { Vehicle } from '../types/vehicle';
-import type { UserProfile } from '../store/profile';
+import type { UserVehicleProfile } from '../store/profile';
 
 export interface ChatMessage {
   id: string;
@@ -13,9 +13,52 @@ export interface ChatMessage {
 export type AIMode = 'mock' | 'gemini';
 
 interface ChatContext {
-  profile?: UserProfile;
+  profile?: UserVehicleProfile;
   vehicles: Vehicle[];
 }
+
+const PRIMARY_USE_COPY: Record<string, string> = {
+  commuter: 'primarily commuting in the city',
+  family: 'hauling family and cargo most days',
+  outdoor: 'seeking outdoor and off-road adventures',
+  eco_urban: 'focused on tech-forward, eco urban driving'
+};
+
+const STYLE_COPY: Record<string, string> = {
+  sedan_lux: 'sleek sedan sophistication',
+  crossover_suv: 'versatile crossover practicality',
+  truck_offroad: 'rugged off-road capability',
+  ev_tech: 'futuristic EV innovation'
+};
+
+const describeProfileForAI = (profile?: UserVehicleProfile): string => {
+  if (!profile) {
+    return 'User has not completed the vehicle profile yet.';
+  }
+
+  const primaryUse =
+    PRIMARY_USE_COPY[profile.primaryUse] || profile.primaryUse || 'mixed driving';
+  const fuels = profile.prefFuel?.length
+    ? profile.prefFuel.join(', ')
+    : 'Open to any fuel';
+  const style = STYLE_COPY[profile.style] || profile.style || 'flexible';
+  const needs =
+    profile.vehicleNeedsTags && profile.vehicleNeedsTags.length
+      ? profile.vehicleNeedsTags.join(', ')
+      : 'None highlighted';
+  const concerns =
+    profile.keyConcerns && profile.keyConcerns.length
+      ? profile.keyConcerns.join(', ')
+      : 'Not specified';
+
+  return `User profile:
+- Primary use: ${primaryUse}
+- Preferred fuels: ${fuels}
+- Style vibe: ${style}
+- Budget sensitivity: ${profile.budgetSensitivity}/5
+- Vehicle needs: ${needs}
+- Key concerns: ${concerns}`;
+};
 
 /**
  * MOCK AI - Rule-based responses
@@ -221,11 +264,7 @@ You are a helpful Toyota vehicle recommendation assistant called Toyota Nexus.
 
 Available vehicles: ${context.vehicles.length} Toyota models including sedans, SUVs, trucks, hybrids, and electric vehicles.
 
-${context.profile?.completed ? `User Profile:
-- Budget: ${formatCurrency(context.profile.budgetMonthly)}/month
-- Fuel preference: ${context.profile.preferredFuelType}
-- Body style: ${context.profile.preferredBodyStyle}
-- Lifestyle: ${context.profile.lifestyleTags.join(', ')}` : 'User has not completed profile quiz yet.'}
+${describeProfileForAI(context.profile)}
 
 Some popular vehicles:
 - Camry: Midsize sedan, 32 MPG, $28,400
@@ -276,7 +315,7 @@ export async function generateAIResponse(
 /**
  * Get quick suggest chips
  */
-export function getQuickSuggestions(profile?: UserProfile): string[] {
+export function getQuickSuggestions(profile?: UserVehicleProfile): string[] {
   const suggestions = [
     "Best hybrids under $400/mo",
     "Compare Camry vs. Corolla",
@@ -285,12 +324,27 @@ export function getQuickSuggestions(profile?: UserProfile): string[] {
     "Most fuel-efficient vehicles",
   ]
 
-  if (profile?.completed) {
-    if (profile.preferredFuelType === 'Hybrid' || profile.lifestyleTags.includes('eco')) {
+  if (profile) {
+    if (
+      profile.prefFuel?.some((fuel) => fuel === 'Hybrid' || fuel === 'Electric') ||
+      profile.ecoPriority >= 4
+    ) {
       suggestions.unshift('Show me eco-friendly options');
     }
-    if (profile.preferredBodyStyle === 'SUV') {
-      suggestions.unshift('Best SUVs for my budget');
+    if (
+      profile.primaryUse === 'family' ||
+      profile.vehicleNeedsTags?.includes('family_space')
+    ) {
+      suggestions.unshift('Roomiest Toyota family options');
+    }
+    if (
+      profile.primaryUse === 'outdoor' ||
+      profile.vehicleNeedsTags?.includes('off_road')
+    ) {
+      suggestions.unshift('Trail-ready trucks & SUVs');
+    }
+    if (profile.style === 'ev_tech') {
+      suggestions.unshift('Newest Toyota EV tech features');
     }
   }
 

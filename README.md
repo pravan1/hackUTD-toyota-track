@@ -24,6 +24,16 @@ Create environment files from the examples provided:
 
 Fill in the MongoDB connection string and Gemini API key in the backend `.env`.
 
+```bash
+# backend/.env
+MONGODB_URI=mongodb+srv://<user>:<password>@<cluster>/<db>?retryWrites=true&w=majority
+PORT=4000
+AUTH0_DOMAIN=dev-3nsx1ooejlmgxumy.us.auth0.com
+AUTH0_AUDIENCE=http://localhost:4000
+GEMINI_API_KEY=your_gemini_api_key_here
+GEMINI_MODEL=gemini-1.5-flash
+```
+
 ### Running the App Locally
 
 Terminal 1 – start the API (port 4000):
@@ -50,6 +60,8 @@ npm run seed:vehicles
 ```
 
 The seed script loads a curated Toyota dataset with accurate specifications and image URLs.
+
+To verify the five showcase trims (Camry XLE, Corolla Cross XLE AWD, RAV4 Hybrid XSE, Tacoma TRD Off-Road, bZ4X Limited AWD) are present after seeding, run a quick MongoDB query or spot-check via the API. If they are missing, re-run the seed script.
 
 ### Routes & API
 
@@ -92,4 +104,5 @@ README.md        # This file
 - Protected API routes require Auth0 access tokens. The frontend automatically attaches them using the Auth0 React SDK.
 - If MongoDB starts empty, the backend seeds the dataset on server start.
 - Images used in the dataset map to real Toyota trims to avoid mismatches.
+- A manual QA checklist for the psychographic quiz and recommendation flow lives in `docs/qa/vehicle-profile.md`.
 
