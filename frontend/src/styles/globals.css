@@ -1,0 +1,94 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-gray-200;
+  }
+
+  body {
+    @apply bg-white text-toyota-black antialiased;
+    font-feature-settings: 'rlig' 1, 'calt' 1;
+  }
+
+  /* Respect user's motion preferences */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  /* Focus rings for accessibility */
+  .focus-ring {
+    @apply focus:outline-none focus:ring-2 focus:ring-toyota-red focus:ring-offset-2 transition-shadow;
+  }
+
+  /* Link styles */
+  .link {
+    @apply text-toyota-red hover:text-toyota-red-dark focus-ring rounded-sm underline-offset-4 hover:underline transition-colors;
+  }
+
+  /* Button base */
+  .btn {
+    @apply inline-flex items-center justify-center font-medium transition-all focus-ring rounded-md disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-primary {
+    @apply btn bg-toyota-red text-white hover:bg-toyota-red-dark active:scale-95;
+  }
+
+  .btn-secondary {
+    @apply btn bg-toyota-black text-white hover:bg-toyota-gray-dark active:scale-95;
+  }
+
+  .btn-outline {
+    @apply btn border-2 border-toyota-red text-toyota-red hover:bg-toyota-red hover:text-white active:scale-95;
+  }
+
+  /* Card styles */
+  .card {
+    @apply bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow;
+  }
+
+  /* Input styles */
+  .input {
+    @apply w-full px-4 py-2 border border-gray-300 rounded-md focus-ring bg-white text-toyota-black placeholder:text-toyota-gray-dark;
+  }
+
+  /* Skeleton loading state */
+  .skeleton {
+    @apply bg-toyota-gray-light animate-skeleton rounded;
+  }
+}
+
+@layer utilities {
+  /* Custom scrollbar */
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    @apply bg-toyota-gray-light;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    @apply bg-toyota-gray-medium rounded-full;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    @apply bg-toyota-gray-dark;
+  }
+
+  /* Container */
+  .container-custom {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+}
